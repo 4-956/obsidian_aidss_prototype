@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIDSS — Obsidian Consulting & Advisory</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-primary:#ffffff;--bg-secondary:#f5f6f8;--bg-tertiary:#edf0f4;
+  --text-primary:#111827;--text-secondary:#6b7280;--text-tertiary:#9ca3af;
+  --border-light:rgba(0,0,0,0.08);--border-mid:rgba(0,0,0,0.14);
+  --radius-md:8px;--radius-lg:12px;
+  --info-bg:rgba(55,138,221,0.08);--info-text:#185FA5;
+  --danger-bg:rgba(226,75,74,0.1);--danger-text:#A32D2D;
+  --success-bg:rgba(99,153,34,0.1);--success-text:#3B6D11;
+  --warn-bg:rgba(239,159,39,0.12);--warn-text:#854F0B;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;color:var(--text-primary);background:#1a1a2e;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.app-shell{width:100%;max-width:960px;background:var(--bg-secondary);border-radius:var(--radius-lg);overflow:hidden;border:0.5px solid var(--border-mid);box-shadow:0 24px 80px rgba(0,0,0,0.4)}
+.topbar{background:#0D1B2A;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.logo-gem{width:26px;height:26px;flex-shrink:0}
+.topbar-title{font-size:13px;font-weight:600;color:#fff;letter-spacing:.3px}
+.topbar-sub{font-size:11px;color:#7a8fa8;letter-spacing:.2px}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.status-pill{display:flex;align-items:center;gap:5px}
+.pulse{width:7px;height:7px;border-radius:50%;background:#2ecc71;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.status-txt{font-size:11px;color:#7a8fa8}
+.mine-badge{font-size:11px;color:#c9a227;background:rgba(201,162,39,.12);border:0.5px solid rgba(201,162,39,.3);border-radius:5px;padding:3px 9px;cursor:pointer;user-select:none;transition:.15s}
+.mine-badge:hover{background:rgba(201,162,39,.2)}
+.nav{display:flex;background:#0D1B2A;border-bottom:1px solid rgba(255,255,255,.06);padding:0 18px;gap:0;overflow-x:auto}
+.nav-btn{font-size:12px;color:#7a8fa8;padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:.15s;white-space:nowrap;user-select:none}
+.nav-btn:hover{color:#b0bec5}
+.nav-btn.active{color:#c9a227;border-bottom-color:#c9a227;font-weight:600}
+.layout{display:flex;min-height:520px}
+.sidebar{width:192px;background:#111f30;border-right:1px solid rgba(255,255,255,.05);padding:12px 0;flex-shrink:0}
+.sb-section{font-size:9.5px;color:#3d5470;letter-spacing:.7px;text-transform:uppercase;padding:12px 14px 5px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;border-left:2px solid transparent;transition:.12s;user-select:none}
+.sb-item:hover{background:rgba(255,255,255,.03)}
+.sb-item.active{background:rgba(201,162,39,.07);border-left-color:#c9a227}
+.sb-icon{width:15px;height:15px;opacity:.55;flex-shrink:0;color:#7a8fa8}
+.sb-item.active .sb-icon{opacity:.9;color:#c9a227}
+.sb-label{font-size:12px;color:#7a8fa8}
+.sb-item.active .sb-label{color:#c9a227}
+.sb-badge{margin-left:auto;min-width:18px;height:16px;border-radius:8px;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0 5px;font-weight:600}
+.b-red{background:rgba(226,75,74,.18);color:#f09595}
+.b-amber{background:rgba(239,159,39,.18);color:#fac775}
+.b-blue{background:rgba(55,138,221,.14);color:#85b7eb}
+.b-green{background:rgba(99,153,34,.14);color:#97c459}
+.content{flex:1;overflow-y:auto;padding:16px;background:var(--bg-secondary)}
+.panel{display:none}
+.panel.active{display:block}
+
+/* Metric cards */
+.metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.metric-card{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);padding:12px 14px}
+.mc-label{font-size:10.5px;color:var(--text-secondary);margin-bottom:4px;letter-spacing:.1px}
+.mc-val{font-size:24px;font-weight:600;line-height:1;margin-bottom:3px}
+.mc-sub{font-size:10.5px;color:var(--text-tertiary)}
+.v-red{color:#E24B4A}.v-amber{color:#BA7517}.v-green{color:#3B6D11}
+
+.sec-title{font-size:12.5px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;color:var(--text-primary)}
+.s-chip{font-size:10px;font-weight:400;color:var(--text-secondary);background:var(--bg-tertiary);border:0.5px solid var(--border-light);border-radius:4px;padding:2px 7px}
+
+/* Threat cards */
+.threat-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.tc{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);overflow:hidden;cursor:pointer;transition:.12s}
+.tc:hover{border-color:var(--border-mid)}
+.tc.open .tc-body{display:block}
+.tc.open .chevron{transform:rotate(180deg)}
+.tc-head{display:flex;align-items:center;gap:10px;padding:10px 13px}
+.tc-lev{width:58px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.lev-high{background:rgba(226,75,74,.12);color:#E24B4A;border:0.5px solid rgba(226,75,74,.25)}
+.lev-med{background:rgba(239,159,39,.12);color:#BA7517;border:0.5px solid rgba(239,159,39,.25)}
+.lev-low{background:rgba(99,153,34,.12);color:#3B6D11;border:0.5px solid rgba(99,153,34,.25)}
+.lev-res{background:rgba(55,138,221,.08);color:#185FA5;border:0.5px solid rgba(55,138,221,.2)}
+.tc-desc{flex:1;font-size:12px;line-height:1.4;color:var(--text-primary)}
+.tc-zone{font-size:10px;color:var(--text-tertiary)}
+.tc-time{font-size:10px;color:var(--text-secondary);text-align:right;flex-shrink:0}
+.chevron{font-size:11px;color:var(--text-tertiary);flex-shrink:0;transition:.15s;margin-left:4px}
+.tc-body{display:none;border-top:0.5px solid var(--border-light);padding:12px 13px}
+.tc-summary{font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px}
+.opts-label{font-size:10.5px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;letter-spacing:.2px}
+.opts{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.opt{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:var(--radius-md);border:0.5px solid var(--border-light);cursor:pointer;transition:.12s;background:var(--bg-secondary)}
+.opt:hover{border-color:var(--border-mid);background:var(--bg-primary)}
+.opt.sel{border-color:rgba(55,138,221,.45);background:rgba(55,138,221,.05)}
+.opt-n{width:20px;height:20px;border-radius:50%;background:var(--info-bg);font-size:10px;font-weight:600;color:var(--info-text);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.opt-rec{font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(55,138,221,.12);color:var(--info-text);flex-shrink:0}
+.opt-txt{font-size:12px;color:var(--text-primary);line-height:1.4;flex:1}
+.tc-btns{display:flex;gap:8px;margin-bottom:8px}
+.btn-auth{font-size:12px;padding:6px 14px;border-radius:var(--radius-md);cursor:pointer;border:0.5px solid rgba(55,138,221,.4);background:rgba(55,138,221,.07);color:var(--info-text);font-weight:600;transition:.12s}
+.btn-auth:hover{background:rgba(55,138,221,.14)}
+.btn-ovr{font-size:12px;padding:6px 14px;border-radius:var(--radius-md);cursor:pointer;border:0.5px solid var(--border-mid);background:transparent;color:var(--text-secondary);transition:.12s}
+.btn-ovr:hover{background:var(--bg-tertiary)}
+.tc-rule{font-size:10px;color:var(--text-tertiary);border-top:0.5px solid var(--border-light);padding-top:8px;line-height:1.5}
+
+/* Zone map */
+.zone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.zone-card{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);padding:10px 12px;border-left-width:3px}
+.zc-high{border-left-color:#E24B4A}.zc-med{border-left-color:#EF9F27}.zc-low{border-left-color:#639922}.zc-ok{border-left-color:var(--border-light)}
+.zn-name{font-size:12px;font-weight:600;margin-bottom:3px}
+.zn-sensors{font-size:10px;color:var(--text-secondary);margin-bottom:6px}
+.zn-score-row{display:flex;align-items:center;gap:6px}
+.zn-num{font-size:20px;font-weight:600;min-width:30px}
+.zn-high{color:#E24B4A}.zn-med{color:#BA7517}.zn-low{color:#3B6D11}
+.bar-bg{flex:1;height:5px;border-radius:3px;background:var(--bg-tertiary);overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+
+/* Data table */
+.dtable{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+.dtable th{text-align:left;font-size:10px;font-weight:600;color:var(--text-secondary);letter-spacing:.4px;text-transform:uppercase;padding:6px 10px;border-bottom:0.5px solid var(--border-light)}
+.dtable td{padding:8px 10px;border-bottom:0.5px solid var(--border-light);color:var(--text-primary)}
+.dtable tr:last-child td{border-bottom:none}
+.dtable tbody tr:hover td{background:var(--bg-tertiary)}
+
+/* Predict */
+.predict-box{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);padding:14px;margin-bottom:10px}
+.pb-title{font-size:12.5px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.pb-chip{font-size:10px;background:var(--info-bg);color:var(--info-text);border-radius:3px;padding:2px 7px;font-weight:400}
+.factor-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.factor-lbl{font-size:11px;color:var(--text-secondary);width:130px;flex-shrink:0}
+.factor-bar{flex:1;height:4px;border-radius:2px;background:var(--bg-tertiary)}
+.factor-fill{height:100%;border-radius:2px}
+.factor-val{font-size:11px;font-weight:600;min-width:26px;text-align:right}
+.slider-row{margin-bottom:10px}
+.slider-lbl{font-size:11px;color:var(--text-secondary);margin-bottom:5px}
+.slider-wrap{display:flex;align-items:center;gap:10px}
+.slider-wrap input[type=range]{flex:1;accent-color:#c9a227}
+.slider-val{font-size:13px;font-weight:600;min-width:20px}
+
+/* Community */
+.tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.tip-card{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);padding:10px 12px}
+.tip-anon{font-size:10px;padding:2px 7px;border-radius:3px;background:var(--info-bg);color:var(--info-text);display:inline-block;margin-bottom:6px}
+.tip-text{font-size:12px;color:var(--text-primary);line-height:1.5;margin-bottom:6px}
+.tip-meta{font-size:10px;color:var(--text-secondary);display:flex;justify-content:space-between;align-items:center}
+.tip-status{font-size:10px;padding:2px 7px;border-radius:3px}
+.ts-p{background:var(--warn-bg);color:var(--warn-text)}
+.ts-v{background:var(--success-bg);color:var(--success-text)}
+.ts-a{background:var(--info-bg);color:var(--info-text)}
+.sl-gauge{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:8px}
+.sl-lbl{font-size:11px;color:var(--text-secondary);margin-bottom:7px}
+.sl-bar{height:9px;border-radius:5px;background:var(--bg-tertiary);overflow:hidden;margin-bottom:5px}
+.sl-fill{height:100%;border-radius:5px}
+.sl-row{display:flex;justify-content:space-between;font-size:11px}
+
+/* Governance */
+.gov-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.gov-item{display:flex;align-items:flex-start;gap:10px;background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);padding:10px 12px}
+.gov-ico{width:28px;height:28px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700}
+.gi-ok{background:var(--success-bg);color:var(--success-text)}
+.gi-warn{background:var(--warn-bg);color:var(--warn-text)}
+.gi-fail{background:var(--danger-bg);color:var(--danger-text)}
+.gov-body{flex:1}
+.gov-title{font-size:12px;font-weight:600;margin-bottom:2px}
+.gov-desc{font-size:11px;color:var(--text-secondary);line-height:1.5}
+.gov-tag{font-size:10px;margin-top:4px;display:inline-block;padding:1px 6px;border-radius:3px}
+.gt-ok{background:var(--success-bg);color:var(--success-text)}
+.gt-warn{background:var(--warn-bg);color:var(--warn-text)}
+.gt-fail{background:var(--danger-bg);color:var(--danger-text)}
+.timer-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);padding:7px 10px;background:var(--bg-tertiary);border-radius:var(--radius-md);border:0.5px solid var(--border-light)}
+.tdot{width:7px;height:7px;border-radius:50%;background:#E24B4A;animation:pulse 1s infinite;flex-shrink:0}
+
+/* Flow */
+.flow-list{display:flex;flex-direction:column;gap:0;margin-bottom:14px}
+.flow-step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:0.5px solid var(--border-light)}
+.flow-step:last-child{border-bottom:none}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--info-bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--info-text);flex-shrink:0}
+.step-body{flex:1}
+.step-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.step-desc{font-size:12px;color:var(--text-secondary);line-height:1.5}
+.step-tag{font-size:10px;color:var(--text-tertiary);margin-top:3px}
+.value-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.val-card{background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);padding:10px 12px;font-size:11px;color:var(--text-secondary);line-height:1.6}
+.val-card strong{display:block;font-size:12px;color:var(--text-primary);margin-bottom:3px;font-weight:600}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:#0D1B2A;color:#e2e8f0;border:0.5px solid rgba(201,162,39,.35);border-radius:var(--radius-md);padding:10px 15px;font-size:12px;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;max-width:280px;z-index:999;line-height:1.5}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* Send btn */
+.ask-btn{font-size:12px;padding:8px 14px;border-radius:var(--radius-md);cursor:pointer;border:0.5px solid var(--border-mid);background:var(--bg-tertiary);color:var(--text-secondary);transition:.12s;width:100%;text-align:left;display:block;margin-top:4px}
+.ask-btn:hover{background:var(--bg-primary);border-color:var(--border-mid);color:var(--text-primary)}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg class="logo-gem" width="26" height="26" viewBox="0 0 26 26">
+        <polygon points="13,2 23,8 23,18 13,24 3,18 3,8" fill="none" stroke="#c9a227" stroke-width="1.2"/>
+        <polygon points="13,7 19,10.5 19,17 13,20 7,17 7,10.5" fill="#c9a227" opacity=".2"/>
+        <polygon points="13,10 17,12.5 17,16 13,18 9,16 9,12.5" fill="#c9a227" opacity=".45"/>
+      </svg>
+      <div>
+        <div class="topbar-title">AIDSS — AI-Enabled Security Intelligence Platform</div>
+        <div class="topbar-sub">Obsidian Consulting &amp; Advisory &nbsp;·&nbsp; Kumba Iron Ore</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="status-pill"><div class="pulse"></div><span class="status-txt">System online</span></div>
+      <div class="mine-badge" id="mine-btn" onclick="toggleMine()">Sishen Mine ▾</div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-btn active" onclick="showPanel('threats',this)">Threat Intelligence</div>
+    <div class="nav-btn" onclick="showPanel('map',this)">Risk Map</div>
+    <div class="nav-btn" onclick="showPanel('predict',this)">Predictive Model</div>
+    <div class="nav-btn" onclick="showPanel('community',this)">Community Intelligence</div>
+    <div class="nav-btn" onclick="showPanel('governance',this)">Governance</div>
+    <div class="nav-btn" onclick="showPanel('flow',this)">Process Flow</div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sb-section">Active Alerts</div>
+      <div class="sb-item active" onclick="showPanel('threats',document.querySelectorAll('.nav-btn')[0])">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="9" stroke-linecap="round"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+        <span class="sb-label">Threat alerts</span><span class="sb-badge b-red">3</span>
+      </div>
+      <div class="sb-item" onclick="showPanel('map',document.querySelectorAll('.nav-btn')[1])">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12" rx="2"/><circle cx="8" cy="7" r="2"/><path d="M5.5 12c.7-1.3 1.4-2 2.5-2s1.8.7 2.5 2" stroke-linecap="round"/></svg>
+        <span class="sb-label">Zone risk map</span><span class="sb-badge b-amber">2</span>
+      </div>
+      <div class="sb-section">Analytics</div>
+      <div class="sb-item" onclick="showPanel('predict',document.querySelectorAll('.nav-btn')[2])">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><polyline points="2,12 5,8 8,10 11,5 14,7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="sb-label">Risk scoring</span>
+      </div>
+      <div class="sb-item" onclick="showPanel('community',document.querySelectorAll('.nav-btn')[3])">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="6" cy="6" r="2.5"/><circle cx="11" cy="6" r="2"/><path d="M2 13c.5-1.5 1.8-2.5 4-2.5s3.5 1 4 2.5" stroke-linecap="round"/></svg>
+        <span class="sb-label">Community tips</span><span class="sb-badge b-blue">5</span>
+      </div>
+      <div class="sb-section">Compliance</div>
+      <div class="sb-item" onclick="showPanel('governance',document.querySelectorAll('.nav-btn')[4])">
+        <svg class="sb-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 2L14 5v4c0 3-2.5 4.5-6 5-3.5-.5-6-2-6-5V5z"/><polyline points="5.5,8 7.5,10 11,6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="sb-label">Governance</span><span class="sb-badge b-green">✓</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- THREATS -->
+      <div class="panel active" id="panel-threats">
+        <div class="metric-row">
+          <div class="metric-card"><div class="mc-label">High threats</div><div class="mc-val v-red">2</div><div class="mc-sub">Immediate action required</div></div>
+          <div class="metric-card"><div class="mc-label">Medium threats</div><div class="mc-val v-amber">1</div><div class="mc-sub">Act within 15 min</div></div>
+          <div class="metric-card"><div class="mc-label">Avg response target</div><div class="mc-val" style="font-size:19px">&lt; 8 min</div><div class="mc-sub v-green">On track today</div></div>
+        </div>
+        <div class="sec-title">Active threat log <span class="s-chip">Live · auto-updates</span></div>
+        <div class="threat-list" id="threat-list"></div>
+        <button class="ask-btn" onclick="openLink('https://claude.ai')">Ask Obsidian: What does persistent Section 4 night breach activity indicate? ↗</button>
+      </div>
+
+      <!-- MAP -->
+      <div class="panel" id="panel-map">
+        <div class="sec-title">Zone risk map — Sishen Mine <span class="s-chip">Shift: Night 22 Apr</span></div>
+        <div class="zone-grid" id="zone-grid"></div>
+        <div class="sec-title" style="margin-top:4px">Sensor asset status</div>
+        <table class="dtable"><thead><tr><th>Asset</th><th>Zone</th><th>Type</th><th>Status</th><th>Last signal</th></tr></thead><tbody id="sensor-tb"></tbody></table>
+        <button class="ask-btn" onclick="openLink('https://claude.ai')">Ask Obsidian: Which zone needs immediate drone redeployment? ↗</button>
+      </div>
+
+      <!-- PREDICT -->
+      <div class="panel" id="panel-predict">
+        <div class="sec-title">Pre-shift predictive risk briefing <span class="s-chip">Night shift · 22 Apr</span></div>
+        <div class="predict-box">
+          <div class="pb-title">Tier 3 risk score — Section 4 South <span class="pb-chip">Model output</span></div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+            <div style="font-size:42px;font-weight:700;line-height:1;color:#E24B4A" id="risk-score">84</div>
+            <div><div style="font-size:11px;color:var(--text-secondary)">Score / 100 — HIGH risk</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Recommendation: deploy 2 drones + armed patrol</div></div>
+          </div>
+          <div style="font-size:10.5px;font-weight:600;color:var(--text-secondary);margin-bottom:7px">Contributing factors</div>
+          <div id="factor-list"></div>
+          <div style="font-size:10px;color:var(--text-tertiary);border-top:0.5px solid var(--border-light);padding-top:8px;margin-top:8px;line-height:1.5">Tier 1 anomaly detection: 3 motion sensor triggers at 02:30 (baseline: 0.2/hr) · Tier 2 trend: 4-week rising pattern in this zone</div>
+        </div>
+        <div class="predict-box">
+          <div class="pb-title">Adjust risk inputs <span class="pb-chip">Interactive model</span></div>
+          <div class="slider-row"><div class="slider-lbl">Community tip-off volume this week</div><div class="slider-wrap"><input type="range" min="0" max="10" value="6" id="sl-tips" oninput="recalc()"><span class="slider-val" id="sv-tips">6</span></div></div>
+          <div class="slider-row"><div class="slider-lbl">Historical incident rate (last 30 days)</div><div class="slider-wrap"><input type="range" min="0" max="10" value="7" id="sl-hist" oninput="recalc()"><span class="slider-val" id="sv-hist">7</span></div></div>
+          <div class="slider-row"><div class="slider-lbl">Surveillance coverage gaps</div><div class="slider-wrap"><input type="range" min="0" max="5" value="2" id="sl-gaps" oninput="recalc()"><span class="slider-val" id="sv-gaps">2</span></div></div>
+        </div>
+        <button class="ask-btn" onclick="openLink('https://claude.ai')">Ask Obsidian: How does the predictive model logic work? ↗</button>
+      </div>
+
+      <!-- COMMUNITY -->
+      <div class="panel" id="panel-community">
+        <div class="sec-title">Community intelligence network <span class="s-chip">Social licence layer</span></div>
+        <div class="sl-gauge"><div class="sl-lbl">Social licence health score — Northern Cape communities</div><div class="sl-bar"><div class="sl-fill" style="width:68%;background:#639922"></div></div><div class="sl-row"><span style="font-size:13px;font-weight:700;color:#3B6D11">68 / 100</span><span style="font-size:11px;color:var(--text-secondary)">STABLE · last updated 20 Apr</span></div></div>
+        <div class="sl-gauge"><div class="sl-lbl">Tip-off verification accuracy (last 30 days)</div><div class="sl-bar"><div class="sl-fill" style="width:76%;background:#185FA5"></div></div><div class="sl-row"><span style="font-size:13px;font-weight:700;color:#185FA5">76%</span><span style="font-size:11px;color:var(--text-secondary)">Above 70% threshold</span></div></div>
+        <div class="sec-title" style="margin-top:4px">Recent community tip-offs <span class="s-chip">Anonymous channel</span></div>
+        <div class="tip-grid" id="tip-grid"></div>
+        <div class="sec-title" style="margin-top:4px">Economic alternative programme</div>
+        <table class="dtable"><thead><tr><th>Programme</th><th>Participants</th><th>Status</th><th>Value</th></tr></thead><tbody>
+          <tr><td>Tailings recovery cooperative</td><td>34</td><td style="color:#3B6D11">Active</td><td>Reduces illegal mining incentive</td></tr>
+          <tr><td>Drone maintenance apprenticeships</td><td>12</td><td style="color:#3B6D11">Active</td><td>Builds mine security interest</td></tr>
+          <tr><td>Community liaison officers</td><td>2 CLOs</td><td style="color:#3B6D11">Deployed</td><td>Early warning intelligence</td></tr>
+          <tr><td>Community investment fund</td><td>—</td><td style="color:#BA7517">Q2 disbursement pending</td><td>R280,000 allocated</td></tr>
+        </tbody></table>
+        <button class="ask-btn" onclick="openLink('https://claude.ai')">Ask Obsidian: How does community intelligence feed into the risk model? ↗</button>
+      </div>
+
+      <!-- GOVERNANCE -->
+      <div class="panel" id="panel-governance">
+        <div class="sec-title">Governance &amp; compliance status <span class="s-chip">Quarterly audit · April 2026</span></div>
+        <div class="gov-list" id="gov-list"></div>
+        <div class="sec-title">Human oversight gates — this shift</div>
+        <div style="background:var(--bg-primary);border:0.5px solid var(--border-light);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;line-height:1.6">All armed responses require management authorisation. AI risk scores are accompanied by data inputs and weightings. No autonomous lethal or physical force actions permitted.</div>
+          <div class="timer-row"><div class="tdot"></div><span id="timer-txt">Threat 001 awaiting authorisation · 2 min 14 sec elapsed · escalates to Mine GM at 3:00</span></div>
+        </div>
+        <button class="ask-btn" onclick="openLink('https://claude.ai')">Ask Obsidian: What are the legal constraints on the AIDSS system? ↗</button>
+      </div>
+
+      <!-- FLOW -->
+      <div class="panel" id="panel-flow">
+        <div class="sec-title">End-to-end process flow <span class="s-chip">Detect → Predict → Prevent → Respond → Learn</span></div>
+        <div class="flow-list" id="flow-list"></div>
+        <div class="sec-title" style="margin-top:4px">Value creation summary</div>
+        <div class="value-grid">
+          <div class="val-card"><strong>Financial</strong>Reduced mineral theft losses, lower reactive security costs, measurable ROI on prevention investment.</div>
+          <div class="val-card"><strong>Human</strong>Fewer dangerous physical patrols, faster armed response, improved worker confidence and safety.</div>
+          <div class="val-card"><strong>Social</strong>Community employment, social licence maintained, trust built through transparent engagement.</div>
+          <div class="val-card"><strong>Natural</strong>Prevents unregulated extraction and environmental damage caused by illegal mining operations.</div>
+        </div>
+        <button class="ask-btn" onclick="openLink('https://claude.ai')">Ask Obsidian: Explain the full detection-to-learning cycle ↗</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const threats=[
+  {id:'001',level:'high',label:'HIGH',title:'Perimeter breach detected — Section 4 South',desc:'Multiple motion sensors triggered. Drone D2 dispatched. No visual confirmation yet.',zone:'Sishen · Section 4 South',time:'02:30 · 22 Apr',options:[{text:'Deploy armed response team to Section 4 South immediately. Secure all entry/exit points.',rec:true},{text:'Dispatch Drone D1 for additional aerial coverage. Hold armed response on standby.'},{text:'Increase patrol frequency in Section 4 perimeter. Alert mine GM only if visual confirmed.'}],rule:'POPI Act §11: surveillance data used solely for security. Force governed by Voluntary Principles on Security &amp; Human Rights.'},
+  {id:'002',level:'high',label:'HIGH',title:'Camera C3 offline — Section 2 East',desc:'Unexpected signal loss 16:45. Possible tampering or equipment failure. Surveillance gap created.',zone:'Sishen · Section 2 East',time:'16:45 · 16 Apr',options:[{text:'Dispatch maintenance crew with security escort to inspect Camera C3 for tampering or damage.',rec:true},{text:'Reroute nearby Drone D1 to provide aerial coverage of Section 2 until camera restored.'},{text:'Increase foot patrol frequency in Section 2 East until camera is back online.'}],rule:'Mine Health &amp; Safety Act 29 of 1996: section isolation procedures apply. All offline assets logged for audit trail.'},
+  {id:'003',level:'medium',label:'MEDIUM',title:'Abnormal temperature readings — Section 2 storage',desc:'Heat sensor H1 detecting elevated readings (42°C vs baseline 28°C). Possible fire risk or unauthorised activity.',zone:'Sishen · Section 2 East',time:'14:30 · 16 Apr',options:[{text:'Dispatch safety team to inspect storage area. Alert fire suppression system to standby.',rec:true},{text:'Activate environmental monitoring protocol. Log for sustainability compliance report.'},{text:'Monitor for 30 minutes. If readings exceed 50°C, escalate to full emergency protocol.'}],rule:'Mine Health &amp; Safety Act 29 of 1996: safety implications require human verification. ESG reporting applies.'}
+];
+const zones=[
+  {name:'Section 1 North',score:18,level:'low',sensors:'4 online · 0 offline'},
+  {name:'Section 2 East',score:62,level:'med',sensors:'3 online · 1 offline'},
+  {name:'Section 3 West',score:31,level:'low',sensors:'5 online · 0 offline'},
+  {name:'Section 4 South',score:84,level:'high',sensors:'2 online · 2 offline'},
+  {name:'Processing plant',score:22,level:'low',sensors:'6 online · 0 offline'},
+  {name:'Rail corridor',score:55,level:'med',sensors:'3 online · 1 offline'}
+];
+const sensors=[
+  {name:'Motion S4-01',zone:'Section 4 South',type:'Motion sensor',status:'Online',last:'02:31'},
+  {name:'Camera C3',zone:'Section 2 East',type:'CCTV',status:'Offline',last:'16:44'},
+  {name:'Drone D2',zone:'Section 4 South',type:'Thermal drone',status:'Deployed',last:'02:32'},
+  {name:'Fence F4-W',zone:'Section 4 South',type:'Smart fence',status:'Online',last:'02:30'},
+  {name:'Heat H1',zone:'Section 2 East',type:'Heat sensor',status:'Alert',last:'14:30'},
+  {name:'Underground U1',zone:'Section 1 North',type:'Atmospheric',status:'Online',last:'02:00'}
+];
+const tips=[
+  {anon:true,text:'Suspicious vehicles seen near the western perimeter around midnight on Thursday. No plates visible.',meta:'Received 20 Apr · 23:15',status:'verified'},
+  {anon:true,text:'Group of individuals with tools observed near the Section 4 fence line last night.',meta:'Received 21 Apr · 06:40',status:'acted'},
+  {anon:true,text:'Rumour in Kathu community of a planned access attempt this coming Friday night.',meta:'Received 22 Apr · 09:00',status:'pending'},
+  {anon:false,text:'Unusual foot traffic near old conveyor belt exit point on the northern side.',meta:'CLO report · 19 Apr',status:'verified'}
+];
+const govItems=[
+  {ico:'✓',cls:'gi-ok',tag:'gt-ok',tagTxt:'Compliant',title:'POPI Act No. 4 of 2013',desc:'All biometric and CCTV data encrypted at rest and in transit. Tiered access controls. 90-day retention policy configured. No third-party data sharing without consent.'},
+  {ico:'✓',cls:'gi-ok',tag:'gt-ok',tagTxt:'Compliant',title:'Mine Health &amp; Safety Act 29 of 1996',desc:'Automated deterrents restricted to uninhabited zones only. Worker safety notifications precede any automated section restrictions. Response protocols reviewed by legal counsel.'},
+  {ico:'✓',cls:'gi-ok',tag:'gt-ok',tagTxt:'Compliant',title:'Voluntary Principles on Security &amp; Human Rights',desc:'Community liaison programme active. Use-of-force protocols documented and reviewed. Security personnel trained on human rights obligations.'},
+  {ico:'!',cls:'gi-warn',tag:'gt-warn',tagTxt:'Review due',title:'AI Governance Audit (internal)',desc:'Quarterly audit scheduled May 2026. Model accuracy: 74% (target 75%). False positive rate: 12% (target &lt;10%). Bias review pending for community tip-off weighting.'},
+  {ico:'✓',cls:'gi-ok',tag:'gt-ok',tagTxt:'Compliant',title:'Transnet data-sharing agreement',desc:'Corridor risk data shared only under formal MOU. Rail disruption intelligence transmitted via encrypted channel with full audit log.'}
+];
+const factors=[
+  {label:'Historical incidents',val:70,col:'#E24B4A'},
+  {label:'Sensor anomalies',val:90,col:'#E24B4A'},
+  {label:'Community tips',val:60,col:'#EF9F27'},
+  {label:'Surveillance gaps',val:80,col:'#E24B4A'},
+  {label:'Weather visibility',val:55,col:'#EF9F27'},
+  {label:'Shift change window',val:75,col:'#EF9F27'}
+];
+const flowSteps=[
+  {n:1,title:'Data ingestion (detect)',desc:'IoT sensors, drones, cameras, access logs, community tip-offs, and operational data stream continuously into the AIDSS platform.',tag:'Layer 1 — AIDSS · 5 data categories · real-time'},
+  {n:2,title:'Anomaly detection',desc:'Statistical baseline compared against live readings per zone. Any deviation >2 standard deviations triggers an immediate flag within 30 seconds.',tag:'Tier 1 model · alert threshold configurable by zone'},
+  {n:3,title:'Risk scoring and classification',desc:'Multi-variable predictive model assigns a 0–100 risk score per zone per shift. Score drives threat classification: HIGH (70–100), MEDIUM (40–69), LOW (0–39).',tag:'Tier 3 model · pre-shift briefing generated automatically'},
+  {n:4,title:'Decision support output',desc:'AIDSS generates 3 ranked response options per classified threat. AI recommends option 1 based on historical effectiveness. Management authorises or overrides.',tag:'Human oversight gate — no automated armed response without authorisation'},
+  {n:5,title:'Physical intervention (prevent)',desc:'Authorised responses activate Layer 2: geofence deterrents, drone dispatch, patrol deployment, section access lockdown. Underground monitoring closes the shaft infiltration gap.',tag:'Layer 2 — physical architecture · response target <8 min for HIGH threat'},
+  {n:6,title:'Community intelligence loop',desc:'Community tip-offs feed the risk model. Social licence health score tracked monthly. CLO briefings inform weekly risk reports.',tag:'Layer 3 — community integration · POPI Act data protection applies'},
+  {n:7,title:'Outcome logging and model learning',desc:'Every incident outcome, response time, and false positive is logged. Monthly model retraining improves prediction accuracy. Governance audit reviews model bias quarterly.',tag:'Closed-loop learning · continuous improvement cycle'}
+];
+
+function renderThreats(){
+  document.getElementById('threat-list').innerHTML=threats.map((t,i)=>`
+    <div class="tc" id="tc${i}">
+      <div class="tc-head" onclick="toggle(${i})">
+        <div class="tc-lev lev-${t.level}">${t.label}</div>
+        <div class="tc-desc">${t.title}<br><span class="tc-zone">${t.zone}</span></div>
+        <div class="tc-time">${t.time}<br><span style="color:var(--text-tertiary)">ID: ${t.id}</span></div>
+        <div class="chevron">▼</div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-summary">${t.desc}</div>
+        <div class="opts-label">AI-suggested responses</div>
+        <div class="opts">${t.options.map((o,j)=>`<div class="opt" id="opt${i}_${j}" onclick="selOpt(${i},${j})"><div class="opt-n">${j+1}</div>${o.rec?'<span class="opt-rec">Recommended</span>':''}<div class="opt-txt">${o.text}</div></div>`).join('')}</div>
+        <div class="tc-btns">
+          <button class="btn-auth" onclick="auth(${i})">Authorise decision</button>
+          <button class="btn-ovr" onclick="ovr(${i})">Input manual decision</button>
+        </div>
+        <div class="tc-rule">${t.rule}</div>
+      </div>
+    </div>`).join('');
+}
+function toggle(i){document.getElementById('tc'+i).classList.toggle('open')}
+let sel={};
+function selOpt(ti,oi){if(sel[ti]!=null)document.getElementById('opt'+ti+'_'+sel[ti]).classList.remove('sel');sel[ti]=oi;document.getElementById('opt'+ti+'_'+oi).classList.add('sel')}
+function auth(ti){const o=sel[ti]??0;toast('Decision authorised: "'+threats[ti].options[o].text.substring(0,55)+'…" — logged with timestamp & user ID')}
+function ovr(ti){toast('Manual override mode: your decision will be logged, attributed, and added to the audit trail.')}
+
+function renderZones(){
+  document.getElementById('zone-grid').innerHTML=zones.map(z=>{
+    const lc=z.level==='high'?'zc-high':z.level==='med'?'zc-med':'zc-low';
+    const nc=z.level==='high'?'zn-high':z.level==='med'?'zn-med':'zn-low';
+    const fc=z.level==='high'?'#E24B4A':z.level==='med'?'#EF9F27':'#639922';
+    return `<div class="zone-card ${lc}"><div class="zn-name">${z.name}</div><div class="zn-sensors">${z.sensors}</div><div class="zn-score-row"><span class="zn-num ${nc}">${z.score}</span><div class="bar-bg"><div class="bar-fill" style="width:${z.score}%;background:${fc}"></div></div></div></div>`;
+  }).join('');
+  document.getElementById('sensor-tb').innerHTML=sensors.map(s=>{
+    const sc=s.status==='Offline'?'color:#E24B4A':s.status==='Alert'?'color:#BA7517':s.status==='Deployed'?'color:#185FA5':'color:#3B6D11';
+    return `<tr><td>${s.name}</td><td>${s.zone}</td><td style="color:var(--text-secondary)">${s.type}</td><td style="${sc}">${s.status}</td><td style="color:var(--text-secondary)">${s.last}</td></tr>`;
+  }).join('');
+}
+
+function renderFactors(){
+  document.getElementById('factor-list').innerHTML=factors.map(f=>`<div class="factor-row"><span class="factor-lbl">${f.label}</span><div class="factor-bar"><div class="factor-fill" style="width:${f.val}%;background:${f.col}"></div></div><span class="factor-val" style="color:${f.col}">${f.val}</span></div>`).join('');
+}
+
+function recalc(){
+  const t=+document.getElementById('sl-tips').value;
+  const h=+document.getElementById('sl-hist').value;
+  const g=+document.getElementById('sl-gaps').value;
+  document.getElementById('sv-tips').textContent=t;
+  document.getElementById('sv-hist').textContent=h;
+  document.getElementById('sv-gaps').textContent=g;
+  const s=Math.min(100,Math.round(t*4+h*5+g*6+20));
+  const el=document.getElementById('risk-score');
+  el.textContent=s;
+  el.style.color=s>=70?'#E24B4A':s>=40?'#BA7517':'#3B6D11';
+}
+
+function renderCommunity(){
+  const sc={pending:'ts-p',verified:'ts-v',acted:'ts-a'};
+  document.getElementById('tip-grid').innerHTML=tips.map(t=>`<div class="tip-card"><span class="tip-anon">${t.anon?'Anonymous':'CLO report'}</span><div class="tip-text">${t.text}</div><div class="tip-meta"><span>${t.meta}</span><span class="tip-status ${sc[t.status]}">${t.status}</span></div></div>`).join('');
+}
+
+function renderGov(){
+  document.getElementById('gov-list').innerHTML=govItems.map(g=>`<div class="gov-item"><div class="gov-ico ${g.cls}">${g.ico}</div><div class="gov-body"><div class="gov-title">${g.title}</div><div class="gov-desc">${g.desc}</div><span class="gov-tag ${g.tag}">${g.tagTxt}</span></div></div>`).join('');
+}
+
+function renderFlow(){
+  document.getElementById('flow-list').innerHTML=flowSteps.map(s=>`<div class="flow-step"><div class="step-num">${s.n}</div><div class="step-body"><div class="step-title">${s.title}</div><div class="step-desc">${s.desc}</div><div class="step-tag">${s.tag}</div></div></div>`).join('');
+}
+
+function showPanel(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+}
+
+let mineAlt=false;
+function toggleMine(){mineAlt=!mineAlt;document.getElementById('mine-btn').textContent=(mineAlt?'Kolomela Mine':'Sishen Mine')+' ▾';toast('Switched to '+(mineAlt?'Kolomela':'Sishen')+' Mine — data feed updating…')}
+
+function openLink(url){window.open(url,'_blank')}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200)}
+
+renderThreats();renderZones();renderFactors();renderCommunity();renderGov();renderFlow();
+</script>
+</body>
+</html>
